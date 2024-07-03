@@ -1,4 +1,4 @@
-import { Handler, createActionHandler } from "../";
+import { ActionHandler, createActionHandler } from "../";
 import { z } from "zod";
 
 const handler = createActionHandler();
@@ -12,7 +12,7 @@ describe("handler test suit", () => {
   test("Should receive a schema", () => {
     const output = handler.input(fakeSchema);
     expect(output.props.schema).toStrictEqual(fakeSchema);
-    expect(output).toBeInstanceOf(Handler);
+    expect(output).toBeInstanceOf(ActionHandler);
   });
 
   test("Should create a new function", () => {
