@@ -7,8 +7,8 @@ type HandlerProps<T> = {
   parser: Parser;
 };
 
-class Handler<T> {
-  constructor(private props: HandlerProps<T>) {}
+export class Handler<T> {
+  constructor(public props: HandlerProps<T>) {}
 
   input<S extends T>(schema: ZodSchema<S>): Handler<S> {
     return new Handler<S>({
