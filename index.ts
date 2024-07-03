@@ -1,33 +1,55 @@
-import { ZodSchema } from "zod";
+import { ZodSchema, z } from "zod";
 
 type CallbackProcedure<T, R> = (input: T) => Promise<R>;
 
-type HandlerProps<T> = {
-  schema: ZodSchema<T> | null;
+type HandlerProps<T, O> = {
   parser: Parser;
+  input?: ZodSchema<T>;
+  output?: ZodSchema<O>;
 };
 
-export class Handler<T> {
-  constructor(public props: HandlerProps<T>) {}
+export class ActionHandler<T, O> {
+  constructor(private props: HandlerProps<T, O>) {}
 
-  input<S extends T>(schema: ZodSchema<S>): Handler<S> {
-    return new Handler<S>({
-      schema,
+  input<S extends T>(schema: ZodSchema<S>) {
+    return new ActionHandler<S, O>({
+      input: schema,
       parser: this.props.parser,
     });
   }
 
+  output<S extends O>(schema: ZodSchema<S>) {
+    return new ActionHandler<T, S>({
+      parser: this.props.parser,
+      input: this.props.input,
+      output: schema,
+    });
+  }
+
   procedure<R>(callback: CallbackProcedure<T, R>) {
-    const schema = this.props.schema;
-    if (!schema) throw new Error("zod schema must be provided");
+    const input = this.props.input;
+    if (!input) throw new Error("zod schema must be provided");
 
     return async (formData: FormData) => {
-      const output = this.props.parser.execute<T>(schema, formData);
+      const inputData = this.props.parser.execute<T>(input, formData);
 
       try {
-        const response = await callback(output);
+        const response = await callback(inputData);
+
+        if (!this.props.output) {
+          return {
+            data: response,
+            error: null,
+          };
+        }
+
+        const outputData = this.props.parser.execute<O>(
+          this.props.output,
+          formData
+        );
+
         return {
-          data: response,
+          data: outputData,
           error: null,
         };
       } catch (error: any) {
@@ -59,8 +81,7 @@ class Parser {
 }
 
 export const createActionHandler = () => {
-  return new Handler({
-    schema: null,
+  return new ActionHandler({
     parser: new Parser(),
   });
 };
