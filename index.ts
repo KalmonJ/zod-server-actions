@@ -1,4 +1,4 @@
-import { ZodSchema, ZodTypeAny, z } from "zod";
+import { ZodTypeAny, z } from "zod";
 import { isNullResponse } from "./guards";
 
 type CallbackProcedure<T, R> = (input: T) => Promise<R>;
@@ -51,7 +51,7 @@ export class ActionHandler<T, O> {
     );
   }
 
-  procedure<R extends O = O>(callback: CallbackProcedure<T, R>) {
+  handler<R extends O = O>(callback: CallbackProcedure<T, R>) {
     const input = this.props.input;
     if (!input) throw new Error("zod schema must be provided");
 
