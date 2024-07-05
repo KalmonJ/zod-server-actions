@@ -19,6 +19,7 @@
   ],
   "author": "KalmonJ",
   "license": "ISC",
+  "homepage": "https://github.com/KalmonJ/zod-server-actions",
   "dependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.9",
