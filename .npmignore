@@ -1,2 +1,4 @@
 __tests__
 vitest.config.ts
+tsconfig.json
+package.json
