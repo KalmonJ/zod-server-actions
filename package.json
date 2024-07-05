@@ -1,15 +1,23 @@
 {
   "name": "zod-server-actions",
-  "version": "0.2.2",
-  "description": "",
+  "version": "0.2.3",
+  "description": "Simple utility library to create server actions in Next.js",
   "main": "dist/index.js",
   "scripts": {
     "dev": "node --watch dist/index.js",
     "build": "tsc",
     "test": "vitest"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "zod",
+    "next",
+    "server actions",
+    "server",
+    "action",
+    "nextjs",
+    "react"
+  ],
+  "author": "KalmonJ",
   "license": "ISC",
   "dependencies": {
     "@types/jest": "^29.5.12",
