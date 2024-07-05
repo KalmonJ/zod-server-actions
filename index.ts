@@ -1,11 +1,11 @@
-import { ZodSchema, z } from "zod";
+import { ZodSchema, ZodTypeAny, z } from "zod";
 import { isNullResponse } from "./guards";
 
 type CallbackProcedure<T, R> = (input: T) => Promise<R>;
 
 type HandlerProps<T, O> = {
-  input?: ZodSchema<T>;
-  output?: ZodSchema<O>;
+  input?: z.ZodType<T>;
+  output?: z.ZodType<O>;
 } & RetryProps;
 
 type RetryProps = {
@@ -13,15 +13,13 @@ type RetryProps = {
   delay: number;
 };
 
-export type RetryResponse<R, O> = Awaited<R> | Awaited<O> | null;
-
 export class ActionHandler<T, O> {
   constructor(private props: HandlerProps<T, O>, private parser: Parser) {}
 
-  input<S extends T>(schema: ZodSchema<S>) {
-    return new ActionHandler<S, O>(
+  input<S extends ZodTypeAny>(schema: S) {
+    return new ActionHandler<z.infer<S>, O>(
       {
-        input: schema,
+        input: schema as z.ZodType<S>,
         delay: this.props.delay,
         maximumAttempts: this.props.maximumAttempts,
       },
@@ -29,11 +27,11 @@ export class ActionHandler<T, O> {
     );
   }
 
-  output<S extends O>(schema: ZodSchema<S>) {
-    return new ActionHandler<T, S>(
+  output<S extends ZodTypeAny>(schema: S) {
+    return new ActionHandler<T, z.infer<S>>(
       {
-        input: this.props.input,
-        output: schema,
+        input: this.props.input as z.ZodType<T>,
+        output: schema as z.ZodType<S>,
         delay: this.props.delay,
         maximumAttempts: this.props.maximumAttempts,
       },
@@ -53,12 +51,14 @@ export class ActionHandler<T, O> {
     );
   }
 
-  procedure<R>(callback: CallbackProcedure<T, R>) {
+  procedure<R extends O = O>(callback: CallbackProcedure<T, R>) {
     const input = this.props.input;
     if (!input) throw new Error("zod schema must be provided");
 
-    return async (formData: FormData) => {
-      const inputData = this.parser.execute<T>(input, formData);
+    return async <T>(
+      values: T
+    ): Promise<{ data: R; error: null } | { data: null; error: string }> => {
+      const inputData = this.parser.execute(input, values);
 
       try {
         const res = await callback(inputData);
@@ -70,21 +70,21 @@ export class ActionHandler<T, O> {
           };
         }
 
-        const outputData = this.parser.execute<O>(this.props.output, res);
+        const outputData = this.parser.execute(this.props.output, res);
 
         return {
-          data: outputData,
+          data: outputData as R,
           error: null,
         };
       } catch (error: any) {
-        const data = await this.retryAction<R>(
+        const data = await this.retryAction(
           callback,
           inputData,
           this.props.maximumAttempts,
           this.props.delay
         );
 
-        if (isNullResponse<R, O>(data)) {
+        if (isNullResponse(data)) {
           return {
             data: null,
             error: error.message as string,
@@ -94,7 +94,7 @@ export class ActionHandler<T, O> {
         if (this.props.output) {
           const outputData = this.parser.execute(this.props.output, data);
           return {
-            data: outputData,
+            data: outputData as R,
             error: null,
           };
         }
@@ -114,7 +114,7 @@ export class ActionHandler<T, O> {
     delay: number
   ) {
     for (let i = 0; i < maximumAttempts; i++) {
-      console.log("tentando: ", i);
+      console.log("trying again...");
       try {
         const res = await callback(input);
         return res;
@@ -133,7 +133,7 @@ async function sleep(delay: number) {
 }
 
 class Parser {
-  execute<T>(schema: ZodSchema<T>, data: FormData | any) {
+  execute<T>(schema: z.ZodType<T>, data: FormData | any) {
     if (data instanceof FormData) {
       const formValues = this.parseFormData(data);
       return schema.parse(formValues);
@@ -163,20 +163,3 @@ export const createActionHandler = () => {
     parser
   );
 };
-
-const schema = z.object({ name: z.string(), price: z.string() });
-
-const handler = createActionHandler();
-
-const func = handler
-  .input(schema)
-  .output(z.object({ id: z.string() }))
-  .retry({
-    delay: 500,
-    maximumAttempts: 3,
-  })
-  .procedure(async (data) => {
-    throw new Error("Error");
-  });
-
-func(new FormData());
