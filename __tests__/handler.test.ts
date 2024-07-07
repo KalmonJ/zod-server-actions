@@ -1,5 +1,5 @@
-import { ActionHandler, createActionHandler } from "../";
 import { z } from "zod";
+import { createActionHandler, ActionHandler } from "../src/core/handler";
 
 const handler = createActionHandler();
 
