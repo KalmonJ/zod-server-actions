@@ -51,7 +51,7 @@ export class ActionHandler<T, O> {
     const input = this.props.input;
     if (!input) throw new Error("zod schema must be provided");
 
-    return async <T>(values: T): ActionResponse<R> => {
+    return async <T>(values: T): ActionResponse<O> => {
       const inputData = this.parser.execute(input, values);
 
       try {
@@ -67,7 +67,7 @@ export class ActionHandler<T, O> {
         const outputData = this.parser.execute(this.props.output, res);
 
         return {
-          data: outputData as R,
+          data: outputData,
           error: null,
         };
       } catch (error: any) {
@@ -88,7 +88,7 @@ export class ActionHandler<T, O> {
         if (this.props.output) {
           const outputData = this.parser.execute(this.props.output, data);
           return {
-            data: outputData as R,
+            data: outputData,
             error: null,
           };
         }

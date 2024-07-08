@@ -1,16 +1,19 @@
 import { useState, useOptimistic } from "react";
 import { Parser } from "../utils/parser";
+import { CallbackFn } from "../types";
 
 const parser = new Parser();
 
-export const useActionHandler = <T extends (...args: any) => Promise<any>, S>(
+export const useActionHandler = <
+  T extends (...args: any) => Promise<any>,
+  S,
+  F extends CallbackFn<S>
+>(
   action: T,
-  state: S[]
+  state: S,
+  fn: F
 ) => {
-  const [optimisticItems, addOptimisticItem] = useOptimistic<S[], S>(
-    state,
-    (items, newItem) => [...items, newItem]
-  );
+  const [optimisticItems, addOptimisticItem] = useOptimistic<S, S>(state, fn);
 
   const [pending, setPending] = useState(false);
 

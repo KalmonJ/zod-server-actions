@@ -25,3 +25,5 @@ export type ResponseError = {
 };
 
 export type ActionResponse<T> = Promise<ResponseSuccess<T> | ResponseError>;
+
+export type CallbackFn<S> = (state: S, newItem: S) => S;
