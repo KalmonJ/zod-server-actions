@@ -47,7 +47,7 @@ export class ActionHandler<T, O> {
     );
   }
 
-  handler<R extends O = O>(callback: HandlerFn<T, R>) {
+  handler<R extends O>(callback: HandlerFn<T, R>) {
     const input = this.props.input;
     if (!input) throw new Error("zod schema must be provided");
 
