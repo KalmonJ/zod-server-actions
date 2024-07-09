@@ -127,12 +127,15 @@ export class ActionHandler<T, O> {
   }
 }
 
-export const createActionHandler = () => {
+export const createActionHandler = <T = any, O = any>(
+  config?: Partial<HandlerProps<T, O>>
+) => {
   const parser = new Parser();
-  return new ActionHandler(
+  return new ActionHandler<T, O>(
     {
       delay: 0,
       maximumAttempts: 0,
+      ...config,
     },
     parser
   );
