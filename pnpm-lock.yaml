@@ -12,8 +12,11 @@ dependencies:
     specifier: ^20.14.9
     version: 20.14.9
   react:
-    specifier: 19.0.0-rc-f38c22b244-20240704
-    version: 19.0.0-rc-f38c22b244-20240704
+    specifier: 19.0.0-rc-df783f9ea1-20240708
+    version: 19.0.0-rc-df783f9ea1-20240708
+  type-fest:
+    specifier: ^4.21.0
+    version: 4.21.0
   typescript:
     specifier: ^5.5.3
     version: 5.5.3
@@ -995,8 +998,8 @@ packages:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
     dev: false
 
-  /react@19.0.0-rc-f38c22b244-20240704:
-    resolution: {integrity: sha512-OP8O6Oc1rdR9IdIKJRKaL1PYd4eGkn6f88VqiygWyyG4P4RmPPix5pp7MatqSt9TnBOcVT+lBMGoVxRgUFeudQ==}
+  /react@19.0.0-rc-df783f9ea1-20240708:
+    resolution: {integrity: sha512-sEKaKkgwW0cbYIYhUJoTGNHlcXeJDATtiwwm13RoZgzCIRYkE38nOL1RGnY5xUqalXQS1jEObSJCQSeLLi5sEg==}
     engines: {node: '>=0.10.0'}
     dev: false
 
@@ -1121,6 +1124,11 @@ packages:
   /type-detect@4.0.8:
     resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
     engines: {node: '>=4'}
+    dev: false
+
+  /type-fest@4.21.0:
+    resolution: {integrity: sha512-ADn2w7hVPcK6w1I0uWnM//y1rLXZhzB9mr0a3OirzclKF1Wp6VzevUmzz/NRAWunOT6E8HrnpGY7xOfc6K57fA==}
+    engines: {node: '>=16'}
     dev: false
 
   /typescript@5.5.3:

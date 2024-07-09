@@ -23,6 +23,8 @@
   "dependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.9",
+    "react": "19.0.0-rc-df783f9ea1-20240708",
+    "type-fest": "^4.21.0",
     "typescript": "^5.5.3",
     "vitest": "^1.6.0",
     "zod": "^3.23.8"
