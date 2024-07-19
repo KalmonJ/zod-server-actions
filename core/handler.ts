@@ -49,16 +49,16 @@ export class ActionHandler<T, O> {
 
   handler<R extends O>(
     callback: HandlerFn<T, R>
-  ): (values: T) => Promise<ActionResponse<R>>;
+  ): <V>(values: V) => Promise<ActionResponse<R>>;
   handler<R>(
     callback: HandlerFn<T, R>
-  ): (values: T) => Promise<ActionResponse<O>>;
+  ): <V>(values: V) => Promise<ActionResponse<O>>;
 
   handler<R>(callback: HandlerFn<T, R>) {
     const input = this.props.input;
     if (!input) throw new Error("zod schema must be provided");
 
-    return async <T>(values: T): Promise<ActionResponse<any>> => {
+    return async <V>(values: V): Promise<ActionResponse<any>> => {
       const inputData = this.parser.execute(input, values);
 
       try {
