@@ -26,7 +26,7 @@ export class ActionHandler<T, O, TContext> {
         input: schema as z.ZodType<S>,
         delay: this.props.delay,
         maximumAttempts: this.props.maximumAttempts,
-        contextFn: this.props?.contextFn,
+        ...(this.props?.contextFn && { contextFn: this.props.contextFn }),
       },
       this.parser
     );
@@ -39,7 +39,7 @@ export class ActionHandler<T, O, TContext> {
         output: schema as z.ZodType<S>,
         delay: this.props.delay,
         maximumAttempts: this.props.maximumAttempts,
-        contextFn: this.props?.contextFn,
+        ...(this.props?.contextFn && { contextFn: this.props.contextFn }),
       },
       this.parser
     );
@@ -52,7 +52,7 @@ export class ActionHandler<T, O, TContext> {
         output: this.props.output,
         maximumAttempts,
         delay,
-        contextFn: this.props?.contextFn,
+        ...(this.props?.contextFn && { contextFn: this.props.contextFn }),
       },
       this.parser
     );
@@ -138,7 +138,7 @@ export class ActionHandler<T, O, TContext> {
   }
 
   private async createContext() {
-    if (!("contextFn" in this.props)) return;
+    if (!this.props.contextFn) return;
     const context = await this.props.contextFn();
     this.context = context;
   }
