@@ -1,6 +1,6 @@
 {
   "name": "zod-server-actions",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "Simple utility library to create server actions in Next.js",
   "main": "dist/index.js",
   "scripts": {
