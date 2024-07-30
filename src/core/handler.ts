@@ -1,6 +1,7 @@
 import { type ZodTypeAny, z } from "zod";
 import type {
   ActionResponse,
+  CreateActionHandler,
   HandlerFn,
   HandlerProps,
   RetryProps,
@@ -9,52 +10,61 @@ import { isNullResponse } from "../guards";
 import { Parser } from "../utils/parser";
 import { sleep } from "../utils/sleep";
 
-export class ActionHandler<T, O> {
-  constructor(private props: HandlerProps<T, O>, private parser: Parser) {}
+export class ActionHandler<T, O, TContext> {
+  private context!: TContext;
+
+  constructor(
+    private props: HandlerProps<T, O, TContext>,
+    private parser: Parser
+  ) {
+    this.createContext();
+  }
 
   input<S extends ZodTypeAny>(schema: S) {
-    return new ActionHandler<z.infer<S>, O>(
+    return new ActionHandler<z.infer<S>, O, TContext>(
       {
         input: schema as z.ZodType<S>,
         delay: this.props.delay,
         maximumAttempts: this.props.maximumAttempts,
+        contextFn: this.props.contextFn,
       },
       this.parser
     );
   }
 
   output<S extends ZodTypeAny>(schema: S) {
-    return new ActionHandler<T, z.infer<S>>(
+    return new ActionHandler<T, z.infer<S>, TContext>(
       {
         input: this.props.input as z.ZodType<T>,
         output: schema as z.ZodType<S>,
         delay: this.props.delay,
         maximumAttempts: this.props.maximumAttempts,
+        contextFn: this.props.contextFn,
       },
       this.parser
     );
   }
 
   retry({ maximumAttempts, delay }: RetryProps) {
-    return new ActionHandler<T, O>(
+    return new ActionHandler<T, O, TContext>(
       {
         input: this.props.input,
         output: this.props.output,
         maximumAttempts,
         delay,
+        contextFn: this.props.contextFn,
       },
       this.parser
     );
   }
 
   handler<R extends O>(
-    callback: HandlerFn<T, R>
+    callback: HandlerFn<T, R, TContext>
   ): <V>(values: V) => Promise<ActionResponse<R>>;
   handler<R>(
-    callback: HandlerFn<T, R>
+    callback: HandlerFn<T, R, TContext>
   ): <V>(values: V) => Promise<ActionResponse<O>>;
-
-  handler<R>(callback: HandlerFn<T, R>) {
+  handler<R>(callback: HandlerFn<T, R, TContext>) {
     const input = this.props.input;
     if (!input) throw new Error("zod schema must be provided");
 
@@ -62,7 +72,7 @@ export class ActionHandler<T, O> {
       const inputData = this.parser.execute(input, values);
 
       try {
-        const res = await callback(inputData);
+        const res = await callback(inputData, this.context);
 
         if (!this.props.output) {
           return {
@@ -109,7 +119,7 @@ export class ActionHandler<T, O> {
   }
 
   private async retryAction<R>(
-    callback: HandlerFn<T, R>,
+    callback: HandlerFn<T, R, TContext>,
     input: T,
     maximumAttempts: number,
     delay: number
@@ -117,21 +127,26 @@ export class ActionHandler<T, O> {
     for (let i = 0; i < maximumAttempts; i++) {
       console.log("trying again...");
       try {
-        const res = await callback(input);
+        const res = await callback(input, this.context);
         return res;
       } catch (error) {
         await sleep(delay);
       }
     }
+
     return null;
+  }
+
+  private async createContext() {
+    const context = await this.props.contextFn();
+    this.context = context;
   }
 }
 
-export const createActionHandler = <T = any, O = any>(
-  config?: Partial<HandlerProps<T, O>>
-) => {
+export const createActionHandler: CreateActionHandler = (config) => {
   const parser = new Parser();
-  return new ActionHandler<T, O>(
+
+  return new ActionHandler(
     {
       delay: 0,
       maximumAttempts: 0,

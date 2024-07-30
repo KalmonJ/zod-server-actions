@@ -1,14 +1,7 @@
 {
+  "extends": "./configs/tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "rootDir": ".",
-    "outDir": "dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "types": ["react/experimental", "react/canary"]
+    "outDir": "dist"
   },
   "exclude": ["node_modules", "__tests__", "*.config.ts", "dist"]
 }
