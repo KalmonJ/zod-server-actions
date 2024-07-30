@@ -138,6 +138,7 @@ export class ActionHandler<T, O, TContext> {
   }
 
   private async createContext() {
+    if (!this.props.contextFn) return;
     const context = await this.props.contextFn();
     this.context = context;
   }
