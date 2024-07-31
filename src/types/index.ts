@@ -44,5 +44,5 @@ export type CallbackFn<S> = (state: S, newItem: S) => S;
 export type ContextValue = Awaited<ReturnType<Context["contextFn"]>>;
 
 export type CreateActionHandler = <T = any, O = any, TContext = any>(
-  config: Config<T, O, TContext>
+  config?: Config<T, O, TContext>
 ) => ActionHandler<T, O, TContext>;

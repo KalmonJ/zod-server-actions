@@ -14,7 +14,7 @@ export class ActionHandler<T, O, TContext> {
   private context!: TContext;
 
   constructor(
-    private props: HandlerProps<T, O, TContext>,
+    private props: Partial<HandlerProps<T, O, TContext>>,
     private parser: Parser
   ) {
     this.createContext();
@@ -121,8 +121,8 @@ export class ActionHandler<T, O, TContext> {
   private async retryAction<R>(
     callback: HandlerFn<T, R, TContext>,
     input: T,
-    maximumAttempts: number,
-    delay: number
+    maximumAttempts: number = 0,
+    delay: number = 0
   ) {
     for (let i = 0; i < maximumAttempts; i++) {
       console.log("trying again...");
