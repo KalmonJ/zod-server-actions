@@ -1,6 +1,6 @@
 # ActionHandler Library
 
-The `ActionHandler` library provides a robust way to manage and execute asynchronous actions with input validation, output validation, and retry logic. This library leverages `zod` for schema validation and includes functionality to create and handle actions in a structured manner.
+The `ActionHandler` library provides a typesafe and robust way to manage and execute asynchronous actions with input validation, output validation, and retry logic. This library leverages `zod` for schema validation and includes functionality to create and handle actions in a structured manner.
 
 ## Features
 
@@ -54,8 +54,6 @@ Here's a step-by-step guide to creating an action handler:
 
    ```typescript
    const actionHandler = createActionHandler({
-     input: InputSchema,
-     output: OutputSchema,
      maximumAttempts: 3,
      delay: 1000,
      contextFn: async () => {
@@ -69,21 +67,11 @@ Here's a step-by-step guide to creating an action handler:
    Create a handler function that will process the input and return the output.
 
    ```typescript
-   const handler = async (input: z.infer<typeof InputSchema>, context: any) => {
-     return {
-       greeting: `Hello, ${input.name}! You are ${input.age} years old.`,
-     };
-   };
+   const action = handler.input(InputSchema).output(OutputSchema).handler(async () => {
+      // create user and return data
+   })
    ```
-
-4. **Register the Handler**
-
-   Register the handler function with the `handler` method of the action handler.
-
-   ```typescript
-   const action = actionHandler.handler(handler);
-   ```
-
+   
 5. **Execute the Action**
 
    Call the action with the appropriate input.
@@ -102,8 +90,6 @@ Creates a new `ActionHandler` instance with the specified configuration.
 **Parameters:**
 
 - `config` (object): Configuration for the action handler.
-  - `input` (Zod schema): Schema for validating input.
-  - `output` (Zod schema): Schema for validating output (optional).
   - `maximumAttempts` (number): Number of retry attempts (optional, default: 0).
   - `delay` (number): Delay between retries in milliseconds (optional, default: 0).
   - `contextFn` (function): Asynchronous function that returns context data (optional).
@@ -147,19 +133,17 @@ const OutputSchema = z.object({
 });
 
 const actionHandler = createActionHandler({
-  input: InputSchema,
-  output: OutputSchema,
   maximumAttempts: 3,
   delay: 1000,
 });
 
-const handler = async (input: z.infer<typeof InputSchema>, context: any) => {
+const handler = async (input, context) => {
   return {
     greeting: `Hello, ${input.name}!`,
   };
 };
 
-const action = actionHandler.handler(handler);
+const action = actionHandler.input(InputSchema).output(OutputSchema).handler(handler);
 
 (async () => {
   const result = await action({ name: 'Bob', age: 25 });
@@ -170,10 +154,6 @@ const action = actionHandler.handler(handler);
 ## Contributing
 
 Feel free to submit issues or pull requests to improve the library. Contributions are welcome!
-
-## License
-
-This library is licensed under the MIT License. See the `LICENSE` file for more details.
 
 ## Contact
 
