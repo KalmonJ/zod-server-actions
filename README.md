@@ -24,7 +24,7 @@ npm install zod
 Use the `createActionHandler` function to initialize a new action handler with configuration options.
 
 ```typescript
-import { createActionHandler } from 'path/to/action-handler-library';
+import { createActionHandler } from 'zod-server-actions';
 ```
 
 ### Example
@@ -177,4 +177,4 @@ This library is licensed under the MIT License. See the `LICENSE` file for more 
 
 ## Contact
 
-For questions or support, please contact [your-email@example.com].
+For questions or support, please contact kalmonkk69@gmail.com.
