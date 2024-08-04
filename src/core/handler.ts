@@ -11,7 +11,7 @@ import { Parser } from "../utils/parser";
 import { sleep } from "../utils/sleep";
 
 export class ActionHandler<T, O, TContext> {
-  private context!: TContext;
+  private context!: TContext | undefined;
 
   constructor(
     private props: Partial<HandlerProps<T, O, TContext>>,
@@ -156,3 +156,5 @@ export const createActionHandler: CreateActionHandler = (config) => {
     parser
   );
 };
+
+createActionHandler({});
