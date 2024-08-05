@@ -5,7 +5,6 @@ export { Parser } from "./utils";
 export type {
   ActionResponse,
   CallbackFn,
-  ContextValue,
   CreateActionHandler,
   HandlerFn,
   HandlerProps,
