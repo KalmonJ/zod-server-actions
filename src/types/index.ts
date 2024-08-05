@@ -9,13 +9,13 @@ type HandlerBaseProps<T, O> = {
 type Config<T, O, TContext> = Partial<HandlerProps<T, O, TContext>> &
   Context<TContext>;
 
-type Context<T = any> = {
+type Context<T = {}> = {
   contextFn?: () => Promise<T>;
 };
 
 export type HandlerFn<T, R, TContext> = (
   input: T,
-  context?: TContext
+  context: TContext
 ) => Promise<R>;
 
 export type HandlerProps<T, O, TContext> = HandlerBaseProps<T, O> &

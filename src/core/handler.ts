@@ -11,11 +11,11 @@ import { Parser } from "../utils/parser";
 import { sleep } from "../utils/sleep";
 
 export class ActionHandler<T, O, TContext> {
-  private context!: TContext | undefined;
+  private context: TContext = {} as TContext;
 
   constructor(
-    private props: Partial<HandlerProps<T, O, TContext>>,
-    private parser: Parser
+    private readonly props: Partial<HandlerProps<T, O, TContext>> = {},
+    private readonly parser: Parser
   ) {
     this.createContext();
   }
@@ -23,10 +23,8 @@ export class ActionHandler<T, O, TContext> {
   input<S extends ZodTypeAny>(schema: S) {
     return new ActionHandler<z.infer<S>, O, TContext>(
       {
-        input: schema as z.ZodType<S>,
-        delay: this.props.delay,
-        maximumAttempts: this.props.maximumAttempts,
-        ...(this.props?.contextFn && { contextFn: this.props.contextFn }),
+        ...this.props,
+        input: schema,
       },
       this.parser
     );
@@ -35,11 +33,8 @@ export class ActionHandler<T, O, TContext> {
   output<S extends ZodTypeAny>(schema: S) {
     return new ActionHandler<T, z.infer<S>, TContext>(
       {
-        input: this.props.input as z.ZodType<T>,
-        output: schema as z.ZodType<S>,
-        delay: this.props.delay,
-        maximumAttempts: this.props.maximumAttempts,
-        ...(this.props?.contextFn && { contextFn: this.props.contextFn }),
+        ...this.props,
+        output: schema,
       },
       this.parser
     );
@@ -48,11 +43,9 @@ export class ActionHandler<T, O, TContext> {
   retry({ maximumAttempts, delay }: RetryProps) {
     return new ActionHandler<T, O, TContext>(
       {
-        input: this.props.input,
-        output: this.props.output,
+        ...this.props,
         maximumAttempts,
         delay,
-        ...(this.props?.contextFn && { contextFn: this.props.contextFn }),
       },
       this.parser
     );
@@ -146,15 +139,5 @@ export class ActionHandler<T, O, TContext> {
 
 export const createActionHandler: CreateActionHandler = (config) => {
   const parser = new Parser();
-
-  return new ActionHandler(
-    {
-      delay: 0,
-      maximumAttempts: 0,
-      ...config,
-    },
-    parser
-  );
+  return new ActionHandler(config, parser);
 };
-
-createActionHandler({});
