@@ -120,7 +120,7 @@ Creates a new `ActionHandler` instance with the specified configuration.
 ### Basic Example
 
 ```typescript
-import { createActionHandler } from 'path/to/action-handler-library';
+import { createActionHandler } from 'zod-server-actions';
 import { z } from 'zod';
 
 const InputSchema = z.object({
