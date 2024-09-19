@@ -9,6 +9,7 @@ import type {
 import { isNullResponse } from "../guards";
 import { Parser } from "../utils/parser";
 import { sleep } from "../utils/sleep";
+import { makeRetries } from "../utils/retry";
 
 export class ActionHandler<T, O, TContext> {
   private context: TContext = {} as TContext;
@@ -81,12 +82,7 @@ export class ActionHandler<T, O, TContext> {
           error: null,
         };
       } catch (error: any) {
-        const data = await this.retryAction(
-          callback,
-          inputData,
-          this.props.maximumAttempts,
-          this.props.delay
-        );
+        const data = await makeRetries({ ...this.props, cb: callback, context: this.context, input: inputData })
 
         if (isNullResponse(data)) {
           return {
@@ -111,24 +107,6 @@ export class ActionHandler<T, O, TContext> {
     };
   }
 
-  private async retryAction<R>(
-    callback: HandlerFn<T, R, TContext>,
-    input: T,
-    maximumAttempts: number = 0,
-    delay: number = 0
-  ) {
-    for (let i = 0; i < maximumAttempts; i++) {
-      console.log("trying again...");
-      try {
-        const res = await callback(input, this.context);
-        return res;
-      } catch (error) {
-        await sleep(delay);
-      }
-    }
-
-    return null;
-  }
 
   private async createContext() {
     if (!this.props.contextFn) return;

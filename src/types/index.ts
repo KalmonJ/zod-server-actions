@@ -44,3 +44,11 @@ export type CallbackFn<S> = (state: S, newItem: S) => S;
 export type CreateActionHandler = <T = any, O = any, TContext = any>(
   config?: Config<T, O, TContext>
 ) => ActionHandler<T, O, TContext>;
+
+export type MakeRetries<T, R, TContext> = {
+  cb: HandlerFn<T, R, TContext>,
+  input: T
+  maximumAttempts?: number
+  delay?: number,
+  context: TContext
+}
