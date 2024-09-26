@@ -6,6 +6,8 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "emitDeclarationOnly": false,
+    "declaration": true,
     "strict": true,
     "skipLibCheck": true,
     "strictPropertyInitialization": false,
@@ -15,6 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "downlevelIteration": true,
     "isolatedModules": true,
-    "types": ["react/experimental", "react/canary"]
-  }
+    "types": ["react/experimental", "react/canary"],
+  },
+  "include": ["../index.d.ts"]
 }

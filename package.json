@@ -1,13 +1,12 @@
 {
   "name": "zod-server-actions",
-  "version": "0.5.0",
+  "version": "0.5.4",
   "description": "Simple utility library to create server actions in Next.js",
   "main": "dist/index.js",
   "scripts": {
     "dev": "node --watch dist/index.js",
     "build": "tsc",
-    "test": "vitest",
-    "build:types": "tsc -p ./configs/tsconfig.types.json"
+    "test": "vitest"
   },
   "keywords": [
     "zod",
