@@ -8,7 +8,6 @@ import type {
 } from "../types";
 import { isNullResponse } from "../guards";
 import { Parser } from "../utils/parser";
-import { sleep } from "../utils/sleep";
 import { makeRetries } from "../utils/retry";
 
 export class ActionHandler<T, O, TContext> {
@@ -18,7 +17,6 @@ export class ActionHandler<T, O, TContext> {
     private readonly props: Partial<HandlerProps<T, O, TContext>> = {},
     private readonly parser: Parser
   ) {
-    this.createContext();
   }
 
   input<S extends ZodTypeAny>(schema: S) {
@@ -66,6 +64,8 @@ export class ActionHandler<T, O, TContext> {
       const inputData = this.parser.execute(input, values);
 
       try {
+        await this.createContext();
+
         const res = await callback(inputData, this.context);
 
         if (!this.props.output) {
