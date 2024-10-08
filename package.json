@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "node --watch dist/index.js",
+    "format": "prettier --write \"**/*.{ts,md}\"",
     "build": "tsc",
     "test": "vitest"
   },
@@ -21,14 +22,15 @@
   "license": "ISC",
   "homepage": "https://github.com/KalmonJ/zod-server-actions",
   "dependencies": {
+    "prettier": "^3.3.3",
     "react": "19.0.0-rc-df783f9ea1-20240708",
     "typescript": "^5.5.3",
     "vitest": "^1.6.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
     "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.9",
     "@types/react": "^18.3.3"
   }
 }

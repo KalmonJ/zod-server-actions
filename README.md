@@ -24,7 +24,7 @@ npm install zod
 Use the `createActionHandler` function to initialize a new action handler with configuration options.
 
 ```typescript
-import { createActionHandler } from 'zod-server-actions';
+import { createActionHandler } from "zod-server-actions";
 ```
 
 ### Example
@@ -36,7 +36,7 @@ Here's a step-by-step guide to creating an action handler:
    Define the input and output schemas using `zod`.
 
    ```typescript
-   import { z } from 'zod';
+   import { z } from "zod";
 
    const InputSchema = z.object({
      name: z.string(),
@@ -57,7 +57,7 @@ Here's a step-by-step guide to creating an action handler:
      maximumAttempts: 3,
      delay: 1000,
      contextFn: async () => {
-       return { user: 'contextData' }; // Example context data
+       return { user: "contextData" }; // Example context data
      },
    });
    ```
@@ -67,17 +67,20 @@ Here's a step-by-step guide to creating an action handler:
    Create a handler function that will process the input and return the output.
 
    ```typescript
-   const action = handler.input(InputSchema).output(OutputSchema).handler(async () => {
-      // create user and return data
-   })
+   const action = handler
+     .input(InputSchema)
+     .output(OutputSchema)
+     .handler(async () => {
+       // create user and return data
+     });
    ```
-   
-5. **Execute the Action**
+
+4. **Execute the Action**
 
    Call the action with the appropriate input.
 
    ```typescript
-   const result = await action({ name: 'Alice', age: 30 });
+   const result = await action({ name: "Alice", age: 30 });
    console.log(result);
    ```
 
@@ -120,8 +123,8 @@ Creates a new `ActionHandler` instance with the specified configuration.
 ### Basic Example
 
 ```typescript
-import { createActionHandler } from 'zod-server-actions';
-import { z } from 'zod';
+import { createActionHandler } from "zod-server-actions";
+import { z } from "zod";
 
 const InputSchema = z.object({
   name: z.string(),
@@ -143,10 +146,13 @@ const handler = async (input, context) => {
   };
 };
 
-const action = actionHandler.input(InputSchema).output(OutputSchema).handler(handler);
+const action = actionHandler
+  .input(InputSchema)
+  .output(OutputSchema)
+  .handler(handler);
 
 (async () => {
-  const result = await action({ name: 'Bob', age: 25 });
+  const result = await action({ name: "Bob", age: 25 });
   console.log(result);
 })();
 ```

@@ -15,9 +15,8 @@ export class ActionHandler<T, O, TContext> {
 
   constructor(
     private readonly props: Partial<HandlerProps<T, O, TContext>> = {},
-    private readonly parser: Parser
-  ) {
-  }
+    private readonly parser: Parser,
+  ) {}
 
   input<S extends ZodTypeAny>(schema: S) {
     return new ActionHandler<z.infer<S>, O, TContext>(
@@ -25,7 +24,7 @@ export class ActionHandler<T, O, TContext> {
         ...this.props,
         input: schema,
       },
-      this.parser
+      this.parser,
     );
   }
 
@@ -35,7 +34,7 @@ export class ActionHandler<T, O, TContext> {
         ...this.props,
         output: schema,
       },
-      this.parser
+      this.parser,
     );
   }
 
@@ -46,15 +45,15 @@ export class ActionHandler<T, O, TContext> {
         maximumAttempts,
         delay,
       },
-      this.parser
+      this.parser,
     );
   }
 
   handler<R extends O>(
-    callback: HandlerFn<T, R, TContext>
+    callback: HandlerFn<T, R, TContext>,
   ): <V>(values: V) => Promise<ActionResponse<R>>;
   handler<R>(
-    callback: HandlerFn<T, R, TContext>
+    callback: HandlerFn<T, R, TContext>,
   ): <V>(values: V) => Promise<ActionResponse<O>>;
   handler<R>(callback: HandlerFn<T, R, TContext>) {
     const input = this.props.input;
@@ -82,7 +81,12 @@ export class ActionHandler<T, O, TContext> {
           error: null,
         };
       } catch (error: any) {
-        const data = await makeRetries({ ...this.props, cb: callback, context: this.context, input: inputData })
+        const data = await makeRetries({
+          ...this.props,
+          cb: callback,
+          context: this.context,
+          input: inputData,
+        });
 
         if (isNullResponse(data)) {
           return {
@@ -106,7 +110,6 @@ export class ActionHandler<T, O, TContext> {
       }
     };
   }
-
 
   private async createContext() {
     if (!this.props.contextFn) return;

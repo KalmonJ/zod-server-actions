@@ -7,11 +7,11 @@ const parser = new Parser();
 export const useActionHandler = <
   T extends (...args: any) => Promise<any>,
   S,
-  F extends CallbackFn<S>
+  F extends CallbackFn<S>,
 >(
   action: T,
   state: S,
-  fn: F
+  fn: F,
 ) => {
   const [optimisticItems, addOptimisticItem] = useOptimistic<S, S>(state, fn);
 
