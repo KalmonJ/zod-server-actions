@@ -5,13 +5,12 @@ export async function makeRetries<T, R, TContext>({
   cb,
   delay = 1,
   input,
-  maximumAttempts = 1,
+  maximumAttempts = 0,
   context,
 }: MakeRetries<T, R, TContext>) {
   for (let i = 0; i < maximumAttempts; i++) {
-    console.log("trying again...");
     try {
-      const res = await cb(input, context);
+      const res = await cb(input, context as Awaited<TContext>);
       return res;
     } catch (error) {
       await sleep(delay);
