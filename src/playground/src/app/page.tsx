@@ -1,24 +1,9 @@
 import Image from "next/image";
+import { client } from "./_client/client";
 
 export default async function Home() {
-  const response = await fetch("http://localhost:3000/api/users/createUser", {
-    method: "POST",
-    body: JSON.stringify({
-      name: "jhon",
-      email: "jhon@email.com",
-      password: "testtt",
-    }),
-  });
-  const data = await response.json();
-  console.log(data, "response dataaaaaaaaaaaaa");
-
-  // const res = await action({
-  //   file: new File(["hello"], "jhons file"),
-  //   email: "kalmonkk69@gmail.com",
-  //   name: "jhons does",
-  // });
-
-  // console.log(res.data);
+  const posts = await client.posts.getPost();
+  console.log(posts, "posts");
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">

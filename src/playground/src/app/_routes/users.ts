@@ -9,4 +9,10 @@ export const usersRoutes = {
       success: true,
     };
   }),
+  uploadAvatar: handler
+    .input(z.instanceof(FormData))
+    .handler(async (input, ctx) => {
+      const file = input.get("file");
+      console.log(file, "fileee");
+    }),
 } satisfies ActionRoutes;
