@@ -52,9 +52,9 @@ export class ActionHandler<
   ): <V extends I>(values: V) => Promise<ActionResponse<O>>;
   handler<R>(callback: HandlerFn<I, R, C["context"]>) {
     const input = this.inputSchema;
-    const parseOutput = this.parseOutput;
     const outputSchema = this.outputSchema;
-    const handleError = this.handleError.bind(this);
+    const parseOutput = this.parseOutput.bind(this);
+    const errorHandler = this.errorHandler.bind(this);
     const getContext = this.getContext.bind(this);
 
     const handlerResponse = async function <V extends I>(
@@ -68,7 +68,7 @@ export class ActionHandler<
           : await callback(values, ctx);
         return parseOutput(res, outputSchema);
       } catch (error: any) {
-        return handleError(values, error, callback, ctx);
+        return errorHandler(values, error, callback, ctx);
       }
     };
 
@@ -84,23 +84,31 @@ export class ActionHandler<
     callback: HandlerFn<I | undefined, R, C["context"]>,
   ): () => Promise<ActionResponse<O>>;
   query<R>(callback: HandlerFn<I | undefined, R, C["context"]>) {
-    return async (): Promise<ActionResponse<any>> => {
-      const ctx = await this.getContext();
+    const parseOutput = this.parseOutput.bind(this);
+    const getContext = this.getContext.bind(this);
+    const errorHandler = this.errorHandler.bind(this);
+
+    const queryResponse = async function (): Promise<ActionResponse<any>> {
+      const ctx = await getContext();
 
       try {
         const data = await callback(undefined, ctx);
-        return this.parseOutput(data);
+        return parseOutput(data);
       } catch (error: any) {
-        return await this.handleError<R>(undefined, error, callback, ctx);
+        return await errorHandler<R>(undefined, error, callback, ctx);
       }
     };
+
+    queryResponse.prototype = { type: "query" };
+
+    return queryResponse;
   }
 
   private async getContext() {
     return (await this.config.context) as Awaited<C["context"]>;
   }
 
-  private async handleError<R>(
+  private async errorHandler<R>(
     values: I | undefined,
     error: any,
     cb: HandlerFn<I, R, C["context"]>,

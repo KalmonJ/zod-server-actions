@@ -17,7 +17,7 @@ export function createProxyHandler<T extends object>({
         generateClientRoutes(value, baseRouteKey);
       } else {
         fromObj[baseKey + "." + baseRouteKey] = {
-          type: value.prototype?.type ?? "query",
+          type: value.prototype?.type,
         };
       }
     });
