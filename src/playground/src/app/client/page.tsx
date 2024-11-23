@@ -1,18 +1,35 @@
 "use client";
 
-import { uploadFile } from "../_actions";
+import { client } from "../_client/client";
+import { useUpload } from "../../../../core/react/use-upload";
+import { isResponseError } from "../../../../guards";
 
 export default function Page() {
+  const upload = useUpload({
+    onUploadProgress(progress) {
+      console.log(progress, "PROGRESSO");
+    },
+  });
+
   return (
     <main>
       <form
-        action={async (formData) => {
-          const data = await uploadFile(formData);
-          console.log(data, "Return");
+        onSubmit={async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(event.target as HTMLFormElement);
+          const res = await client.users.uploadAvatar(formData);
+          console.log(res, "RESSS");
+          if (isResponseError(res)) {
+            console.log("Error", res);
+            return;
+          }
+
+          upload(res.data);
         }}
       >
-        <input type="file" name="file" />
-        <button>send</button>
+        <input type="file" name="file" required />
+        <button type="submit">Send</button>
       </form>
     </main>
   );

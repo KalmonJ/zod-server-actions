@@ -12,7 +12,14 @@ export const usersRoutes = {
   uploadAvatar: handler
     .input(z.instanceof(FormData))
     .handler(async (input, ctx) => {
-      const file = input.get("file");
-      console.log(file, "fileee");
+      const file = input.get("file") as File;
+
+      if (!ctx) throw new Error("No context provided");
+
+      return ctx.provider.chunkUpload(
+        file,
+        process.env.BUCKET_NAME!,
+        file.name,
+      );
     }),
 } satisfies ActionRoutes;
