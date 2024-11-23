@@ -4,10 +4,10 @@ type CreateProxyHandlerConfig<T extends object> = {
   routes: T;
 };
 
-export function createProxyHandler<T extends object>({
+export function createHandlerCaller<T extends object>({
   routes,
 }: CreateProxyHandlerConfig<T>) {
-  let fromObj: { [key: string]: unknown } = {};
+  let clientRoutes: any = {};
 
   function generateClientRoutes(obj: object, baseKey: string) {
     const keys = Object.entries(obj);
@@ -16,37 +16,48 @@ export function createProxyHandler<T extends object>({
       if (_.isObject(value) && !_.isFunction(value)) {
         generateClientRoutes(value, baseRouteKey);
       } else {
-        fromObj[baseKey + "." + baseRouteKey] = {
-          type: value.prototype?.type,
+        clientRoutes[baseKey + "." + baseRouteKey] = {
+          type: value.prototype.type,
         };
       }
     });
 
-    return fromObj;
+    return clientRoutes;
   }
 
   generateClientRoutes(routes, "");
 
   async function handler(req: Request) {
     const url = new URL(req.url);
-
     const pathname = url.pathname;
-    const path = pathname.split("/").filter(Boolean).slice(1).join(".");
+    const path = pathname.split("/").filter(Boolean).slice(2).join(".");
 
-    if (pathname === "/api/routes") {
-      return new Response(JSON.stringify(fromObj), {
+    if (pathname === "/api/handlers/routes") {
+      return new Response(JSON.stringify(clientRoutes), {
         status: 200,
       });
     }
 
     try {
+      const type = req.headers.get("Content-Type");
       const handler = _.get(routes, path);
+
+      if (type && type.includes("form-data")) {
+        const form = await req.formData();
+        const response = await handler(form);
+        return new Response(response, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/octet-stream",
+            "Transfer-Encoding": "chunked",
+          },
+        });
+      }
 
       if (!handler) throw new Error("Not found");
 
       if (req.method === "GET") {
         const response = await handler();
-
         return new Response(JSON.stringify(response), {
           status: 200,
         });
@@ -59,7 +70,7 @@ export function createProxyHandler<T extends object>({
         status: 200,
       });
     } catch (error: any) {
-      console.log(error, "ERROR PROXY");
+      console.log(error, "CALLER ERROR");
       return new Response(JSON.stringify({ data: null, error: error.message }));
     }
   }

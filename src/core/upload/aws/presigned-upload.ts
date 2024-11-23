@@ -7,7 +7,7 @@ export type PutObjectCommandConfig = ConstructorParameters<
   typeof PutObjectCommand
 >[number];
 
-type PresignedUrlUploadConfig = S3ClientConfig & {
+export type S3Config = S3ClientConfig & {
   object: PutObjectCommandConfig;
 };
 
@@ -15,7 +15,7 @@ export type RequestPresigningArguments = Parameters<typeof getSignedUrl>[2];
 
 export async function presignedUrlUpload(
   file: File | null,
-  props: PresignedUrlUploadConfig,
+  props: S3Config,
   presigningArguments: RequestPresigningArguments,
 ) {
   if (!file) return null;

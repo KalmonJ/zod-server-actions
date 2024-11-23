@@ -23,7 +23,9 @@
   "homepage": "https://github.com/KalmonJ/zod-server-actions",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
+    "@aws-sdk/lib-storage": "^3.697.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
+    "formidable": "^3.5.2",
     "lodash": "^4.17.21",
     "prettier": "^3.3.3",
     "react": "19.0.0-rc-df783f9ea1-20240708",
@@ -33,6 +35,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
     "@types/node": "^20.17.6",

@@ -8,45 +8,58 @@ export async function createServerClient<R extends object>(
   clientConfig: ClientConfig,
 ) {
   try {
-    const response = await fetch(`${clientConfig.apiUrl}/routes`);
+    const response = await fetch(`${clientConfig.apiUrl}/handlers/routes`);
 
     if (!response.ok) throw new Error(response.statusText);
 
     const routes = (await response.json()) as R;
     const entries = Object.entries(routes);
-
-    const clientRoutes = {} as R;
+    let clientRoutes = {} as R;
 
     entries.forEach(([key, metadata]) => {
       const path = key.split(".").join("/");
 
       if (metadata.type === "mutation") {
         _.setWith(clientRoutes, key, async function (input: unknown) {
-          const response = await fetch(`${clientConfig.apiUrl}/${path}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+          if (input instanceof FormData) {
+            const response = await fetch(
+              `${clientConfig.apiUrl}/handlers/${path}`,
+              {
+                method: "POST",
+                body: input,
+              },
+            );
+
+            return response.body;
+          }
+
+          const response = await fetch(
+            `${clientConfig.apiUrl}/handlers/${path}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(input),
             },
-            body: JSON.stringify(input),
-          });
+          );
 
           const data = await response.json();
-
           return data;
         });
       } else {
         _.setWith(clientRoutes, key, async function () {
-          const response = await fetch(`${clientConfig.apiUrl}/${path}`);
+          const response = await fetch(
+            `${clientConfig.apiUrl}/handlers/${path}`,
+          );
+          console.log(response, "RESPOSTA");
           const data = await response.json();
-
           return data;
         });
       }
     });
-
     return clientRoutes as R;
   } catch (error) {
-    console.log(error, "Client request error");
     return {} as R;
   }
 }
