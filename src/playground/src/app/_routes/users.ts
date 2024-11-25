@@ -18,8 +18,7 @@ export const usersRoutes = {
 
       return await ctx.provider.chunkUpload({
         file,
-        accept: ["application/pdf"],
-        bucket: process.env.BUCKET!,
+        bucket: process.env.BUCKET_NAME!,
         key: file.name,
       });
     }),
