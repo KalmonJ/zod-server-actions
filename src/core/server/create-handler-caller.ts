@@ -53,12 +53,18 @@ export function createHandlerCaller<T extends object>({
           });
         }
 
-        return new Response(response.data, {
+        if (response.data instanceof ReadableStream) {
+          return new Response(response.data, {
+            status: 200,
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Transfer-Encoding": "chunked",
+            },
+          });
+        }
+
+        return new Response(JSON.stringify(response), {
           status: 200,
-          headers: {
-            "Content-Type": "application/octet-stream",
-            "Transfer-Encoding": "chunked",
-          },
         });
       }
 

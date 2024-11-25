@@ -3,7 +3,7 @@ import {
   S3Config,
   RequestPresigningArguments,
 } from "./url-presigned-upload";
-import { getValidFileType } from "../../../utils";
+import { lookup } from "mime-types";
 
 import { chunkUpload as awsChunkUpload } from "./chunk-upload";
 
@@ -17,7 +17,6 @@ type UploadBaseProps = {
   file: File | null;
   bucket: string;
   key: string;
-  accept: string[];
 };
 
 interface UrlPresignedUploadProps extends UploadBaseProps {
@@ -34,21 +33,15 @@ export class AWSProvider {
   }
 
   async presignedUrlUpload({
-    accept,
     bucket,
     file,
     key,
     options,
   }: UrlPresignedUploadProps) {
-    if (!file) throw new Error("File must required!");
-
-    const fileType = getValidFileType(accept, file);
-
     const params = {
       object: {
         Bucket: bucket,
         Key: key,
-        ContentType: fileType,
       },
       credentials: {
         accessKeyId: this.ACCESS_KEY_ID,
@@ -60,16 +53,13 @@ export class AWSProvider {
     return await presignedUpload(file, params, options);
   }
 
-  async chunkUpload({ accept, bucket, file, key }: UploadBaseProps) {
+  async chunkUpload({ bucket, file, key }: UploadBaseProps) {
     if (!file) throw new Error("File must required!");
-
-    const fileType = getValidFileType(accept, file);
 
     const params = {
       object: {
         Bucket: bucket,
         Key: key,
-        ContentType: fileType,
       },
       credentials: {
         accessKeyId: this.ACCESS_KEY_ID,

@@ -6,7 +6,6 @@ type UploadProgress = {
 
 type UseUploadProps = {
   onUploadProgress: (progress: UploadProgress) => void;
-  maxSize: number;
 };
 
 export const useUpload = ({ onUploadProgress }: UseUploadProps) => {

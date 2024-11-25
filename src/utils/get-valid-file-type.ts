@@ -1,7 +1,7 @@
 import { lookup } from "mime-types";
 
 export const getValidFileType = (accept: string[], file: File) => {
-  const fileType = lookup(file.type);
+  const fileType = lookup(file.name);
 
   if (!fileType) throw new Error("Invalid file type!");
 
