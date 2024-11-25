@@ -19,7 +19,7 @@ export default function Page() {
 
           const formData = new FormData(event.target as HTMLFormElement);
           const res = await client.users.uploadAvatar(formData);
-          console.log(res, "RESSS");
+
           if (isResponseError(res)) {
             console.log("Error", res);
             return;

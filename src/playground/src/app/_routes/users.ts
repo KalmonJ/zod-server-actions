@@ -16,7 +16,7 @@ export const usersRoutes = {
 
       if (!ctx) throw new Error("No context provided");
 
-      return ctx.provider.chunkUpload(
+      return await ctx.provider.chunkUpload(
         file,
         process.env.BUCKET_NAME!,
         file.name,
