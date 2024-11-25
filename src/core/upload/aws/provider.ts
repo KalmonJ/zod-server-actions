@@ -13,15 +13,15 @@ type AWSProviderProps = {
 };
 
 export class AWSProvider {
-  private readonly SECRET_KEY: string;
-  private readonly REGION: string;
-  private readonly ACCESS_KEY_ID: string;
+  private readonly SECRET_KEY: string = "";
+  private readonly REGION: string = "";
+  private readonly ACCESS_KEY_ID: string = "";
 
   constructor(props: AWSProviderProps) {
     Object.assign(this, props);
   }
 
-  presignedUrlUpload(
+  async presignedUrlUpload(
     file: File | null,
     bucket: string,
     key: string,
@@ -39,10 +39,10 @@ export class AWSProvider {
       region: this.REGION,
     } satisfies S3Config;
 
-    return presignedUpload(file, params, options);
+    return await presignedUpload(file, params, options);
   }
 
-  chunkUpload(file: File | null, bucket: string, key: string) {
+  async chunkUpload(file: File | null, bucket: string, key: string) {
     const params = {
       object: {
         Bucket: bucket,
@@ -55,6 +55,8 @@ export class AWSProvider {
       region: this.REGION,
     } satisfies S3Config;
 
-    return awsChunkUpload(file, params);
+    const stream = await awsChunkUpload(file, params);
+
+    return stream;
   }
 }

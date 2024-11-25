@@ -30,7 +30,17 @@ export async function createServerClient<R extends object>(
               },
             );
 
-            return response.body;
+            if (!response.ok) {
+              return {
+                data: null,
+                error: response.statusText,
+              };
+            }
+
+            return {
+              data: response.body,
+              error: null,
+            };
           }
 
           const response = await fetch(

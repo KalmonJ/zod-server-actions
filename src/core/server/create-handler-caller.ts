@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { isResponseError } from "../../guards";
 
 type CreateProxyHandlerConfig<T extends object> = {
   routes: T;
@@ -45,7 +46,14 @@ export function createHandlerCaller<T extends object>({
       if (type && type.includes("form-data")) {
         const form = await req.formData();
         const response = await handler(form);
-        return new Response(response, {
+
+        if (isResponseError(response)) {
+          return new Response(JSON.stringify(response), {
+            status: 500,
+          });
+        }
+
+        return new Response(response.data, {
           status: 200,
           headers: {
             "Content-Type": "application/octet-stream",

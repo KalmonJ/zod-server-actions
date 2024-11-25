@@ -24,6 +24,7 @@ export async function chunkUpload(file: File | null, s3Config: S3Config) {
           ),
         );
       });
+
       upload.done().then(() => controller.close());
     },
   });
