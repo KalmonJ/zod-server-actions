@@ -1,6 +1,6 @@
 import { PutObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { S3Config } from "./presigned-upload";
+import { S3Config } from "./url-presigned-upload";
 
 export async function chunkUpload(file: File | null, s3Config: S3Config) {
   if (!file) throw new Error("File is required");

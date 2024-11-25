@@ -16,10 +16,11 @@ export const usersRoutes = {
 
       if (!ctx) throw new Error("No context provided");
 
-      return await ctx.provider.chunkUpload(
+      return await ctx.provider.chunkUpload({
         file,
-        process.env.BUCKET_NAME!,
-        file.name,
-      );
+        accept: ["application/pdf"],
+        bucket: process.env.BUCKET!,
+        key: file.name,
+      });
     }),
 } satisfies ActionRoutes;
