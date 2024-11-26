@@ -1,10 +1,10 @@
-type UploadProgress = {
+export type UploadProgress = {
   loaded: number;
   total: number;
   Key: string;
 };
 
-type UseUploadProps = {
+export type UseUploadProps = {
   onUploadProgress: (progress: UploadProgress) => void;
 };
 

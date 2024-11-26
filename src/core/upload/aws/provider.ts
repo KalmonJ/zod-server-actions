@@ -7,20 +7,20 @@ import {
 import { chunkUpload as awsChunkUpload } from "./chunk-upload";
 import { getValidFileType } from "../../../utils";
 
-type AWSProviderProps = {
+export type AWSProviderProps = {
   SECRET_KEY: string;
   REGION: string;
   ACCESS_KEY_ID: string;
 };
 
-type UploadBaseProps = {
+export type UploadBaseProps = {
   file: File | null;
   bucket: string;
   accept?: string[];
   key: string;
 };
 
-interface UrlPresignedUploadProps extends UploadBaseProps {
+export interface UrlPresignedUploadProps extends UploadBaseProps {
   options?: RequestPresigningArguments;
 }
 

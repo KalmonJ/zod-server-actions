@@ -4,10 +4,18 @@ export {
   type Config,
   type Retries,
   ActionHandlerFactory,
-  createProxyHandler,
+  AWSProvider,
+  createHandlerCaller,
+  useUpload,
   createServerClient,
+  type AWSProviderProps,
+  type JSONRoutes,
+  type UploadBaseProps,
+  type UploadProgress,
+  type UrlPresignedUploadProps,
+  type UseUploadProps,
 } from "./core";
-export { errorMessage, formatZodErrors, makeRetries, sleep } from "./utils";
+export { formatZodErrors } from "./utils";
 export type {
   ActionResponse,
   CallbackFn,
