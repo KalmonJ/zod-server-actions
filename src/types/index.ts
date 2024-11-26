@@ -2,7 +2,7 @@ import { ActionHandler, Config } from "../core";
 
 export type HandlerFn<T, R, TContext> = (
   input: T,
-  context?: Awaited<Config<TContext>["context"]>,
+  context: NonNullable<Awaited<Config<TContext>["context"]>>,
 ) => Promise<R>;
 
 export type RetryProps = {

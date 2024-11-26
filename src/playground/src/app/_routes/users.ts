@@ -14,8 +14,6 @@ export const usersRoutes = {
     .handler(async (input, ctx) => {
       const file = input.get("file") as File;
 
-      if (!ctx) throw new Error("No context provided");
-
       return await ctx.provider.chunkUpload({
         file,
         bucket: process.env.BUCKET_NAME!,
