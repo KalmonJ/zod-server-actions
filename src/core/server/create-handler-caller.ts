@@ -9,7 +9,7 @@ type CreateProxyHandlerConfig<T extends JSONRoutes> = {
 };
 
 function generateClientRoutes(
-  from: object,
+  from: JSONRoutes,
   baseKey: string,
   to: Record<string, unknown>,
 ) {
@@ -17,7 +17,7 @@ function generateClientRoutes(
 
   keys.forEach(([baseRouteKey, value]) => {
     if (_.isObject(value) && !_.isFunction(value)) {
-      generateClientRoutes(value, baseRouteKey, to);
+      generateClientRoutes(value as JSONRoutes, baseRouteKey, to);
     } else {
       to[baseKey + "." + baseRouteKey] = {
         type: value.prototype.type,
