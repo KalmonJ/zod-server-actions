@@ -1,9 +1,9 @@
 import { handler } from "@/lib/server";
-import { ActionRoutes } from "../../../../types";
+import { JSONRoutes } from "../../../../core/server/create-handler-caller";
 
 export const postsRoutes = {
   getPost: handler.query(async (input, ctx) => {
     console.log(input, ctx);
     return [{ title: "hello world", descrption: "lorem" }];
   }),
-} satisfies ActionRoutes;
+} satisfies JSONRoutes;

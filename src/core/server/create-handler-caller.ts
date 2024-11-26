@@ -1,32 +1,37 @@
 import _ from "lodash";
 import { isResponseError } from "../../guards";
+import { Handler } from "../../types";
 
-type CreateProxyHandlerConfig<T extends object> = {
+export type JSONRoutes = { [key: string]: JSONRoutes } | Handler;
+
+type CreateProxyHandlerConfig<T extends JSONRoutes> = {
   routes: T;
 };
 
-export function createHandlerCaller<T extends object>({
+function generateClientRoutes(
+  from: object,
+  baseKey: string,
+  to: Record<string, unknown>,
+) {
+  const keys = Object.entries(from);
+
+  keys.forEach(([baseRouteKey, value]) => {
+    if (_.isObject(value) && !_.isFunction(value)) {
+      generateClientRoutes(value, baseRouteKey, to);
+    } else {
+      to[baseKey + "." + baseRouteKey] = {
+        type: value.prototype.type,
+      };
+    }
+  });
+
+  return to;
+}
+
+export function createHandlerCaller<T extends JSONRoutes>({
   routes,
 }: CreateProxyHandlerConfig<T>) {
-  let clientRoutes: any = {};
-
-  function generateClientRoutes(obj: object, baseKey: string) {
-    const keys = Object.entries(obj);
-
-    keys.forEach(([baseRouteKey, value]) => {
-      if (_.isObject(value) && !_.isFunction(value)) {
-        generateClientRoutes(value, baseRouteKey);
-      } else {
-        clientRoutes[baseKey + "." + baseRouteKey] = {
-          type: value.prototype.type,
-        };
-      }
-    });
-
-    return clientRoutes;
-  }
-
-  generateClientRoutes(routes, "");
+  const clientRoutes = generateClientRoutes(routes, "", {});
 
   async function handler(req: Request) {
     const url = new URL(req.url);

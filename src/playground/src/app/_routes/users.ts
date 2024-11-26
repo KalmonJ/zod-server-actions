@@ -1,5 +1,5 @@
 import { handler } from "@/lib/server";
-import { ActionRoutes } from "../../../../types";
+import { JSONRoutes } from "../../../../core/server/create-handler-caller";
 import { z } from "zod";
 
 export const usersRoutes = {
@@ -22,4 +22,4 @@ export const usersRoutes = {
         key: file.name,
       });
     }),
-} satisfies ActionRoutes;
+} satisfies JSONRoutes;
