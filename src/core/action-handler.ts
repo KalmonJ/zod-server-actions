@@ -1,8 +1,7 @@
-import { ZodError, ZodType, type ZodTypeAny, z } from "zod";
+import { ZodType, type ZodTypeAny, z } from "zod";
 import type { ActionResponse, HandlerFn } from "../types";
 import { makeRetries } from "../utils/retry";
 import { Config, Retries } from "./handler-factory";
-import { formatZodErrors } from "../utils/format-zod-errors";
 
 export class ActionHandler<
   C extends Config,
@@ -114,13 +113,6 @@ export class ActionHandler<
     cb: HandlerFn<I, R, C["context"]>,
     ctx: Awaited<C["context"]>,
   ) {
-    if (error instanceof ZodError) {
-      return {
-        data: null,
-        error: formatZodErrors(error),
-      };
-    }
-
     if (!this.config.retries) {
       return {
         data: null,

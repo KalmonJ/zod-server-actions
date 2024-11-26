@@ -5,7 +5,7 @@ import {
 } from "./url-presigned-upload";
 
 import { chunkUpload as awsChunkUpload } from "./chunk-upload";
-import { getValidFileType } from "../../../utils";
+import { getValidMimeType } from "../../../utils";
 
 export type AWSProviderProps = {
   SECRET_KEY: string;
@@ -40,7 +40,7 @@ export class AWSProvider {
     options,
     accept,
   }: UrlPresignedUploadProps) {
-    const mimeType = getValidFileType(file, accept);
+    const mimeType = getValidMimeType(file, accept);
 
     const params = {
       object: {
@@ -59,7 +59,7 @@ export class AWSProvider {
   }
 
   async chunkUpload({ bucket, file, key, accept }: UploadBaseProps) {
-    const mimeType = getValidFileType(file, accept);
+    const mimeType = getValidMimeType(file, accept);
 
     const params = {
       object: {

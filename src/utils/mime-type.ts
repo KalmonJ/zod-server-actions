@@ -1,6 +1,6 @@
 import { lookup } from "mime-types";
 
-export const getValidFileType = (
+export const getValidMimeType = (
   file: File | null,
   acceptedTypes?: string[],
 ) => {
