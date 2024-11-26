@@ -10,7 +10,7 @@ export async function makeRetries<T, R, TContext>({
 }: MakeRetries<T, R, TContext>) {
   for (let i = 0; i < maximumAttempts; i++) {
     try {
-      const res = await cb(input, context as Awaited<TContext>);
+      const res = await cb(input, context as NonNullable<Awaited<TContext>>);
       return res;
     } catch (error) {
       await sleep(delay);
