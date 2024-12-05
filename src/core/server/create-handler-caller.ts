@@ -28,6 +28,53 @@ function generateClientRoutes(
   return to;
 }
 
+async function handleRequestFormData(req: Request, handler: Handler) {
+  const form = await req.formData();
+  const response = await handler(form);
+
+  if (isResponseError(response)) {
+    return new Response(JSON.stringify(response), {
+      status: 500,
+    });
+  }
+
+  if (response.data instanceof ReadableStream) {
+    return new Response(response.data, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Transfer-Encoding": "chunked",
+      },
+    });
+  }
+
+  return new Response(JSON.stringify(response), {
+    status: 200,
+  });
+}
+
+async function handleRequestQuery(handler: Function) {
+  const response = await handler();
+  return new Response(JSON.stringify(response), {
+    status: 200,
+  });
+}
+
+async function handleRequestMutation(req: Request, handler: Handler) {
+  const input = await req.json();
+  const response = await handler(input);
+
+  return new Response(JSON.stringify(response), {
+    status: 200,
+  });
+}
+
+async function handleRequestRoutes(clientRoutes: Record<string, unknown>) {
+  return new Response(JSON.stringify(clientRoutes), {
+    status: 200,
+  });
+}
+
 export function createHandlerCaller<T extends JSONRoutes>({
   routes,
 }: CreateProxyHandlerConfig<T>) {
@@ -39,55 +86,24 @@ export function createHandlerCaller<T extends JSONRoutes>({
     const path = pathname.split("/").filter(Boolean).slice(2).join(".");
 
     if (pathname === "/api/handlers/routes") {
-      return new Response(JSON.stringify(clientRoutes), {
-        status: 200,
-      });
+      return handleRequestRoutes(clientRoutes);
     }
 
     try {
       const type = req.headers.get("Content-Type");
       const handler = _.get(routes, path);
 
-      if (type && type.includes("form-data")) {
-        const form = await req.formData();
-        const response = await handler(form);
-
-        if (isResponseError(response)) {
-          return new Response(JSON.stringify(response), {
-            status: 500,
-          });
-        }
-
-        if (response.data instanceof ReadableStream) {
-          return new Response(response.data, {
-            status: 200,
-            headers: {
-              "Content-Type": "application/octet-stream",
-              "Transfer-Encoding": "chunked",
-            },
-          });
-        }
-
-        return new Response(JSON.stringify(response), {
-          status: 200,
-        });
-      }
-
       if (!handler) throw new Error("Not found");
 
-      if (req.method === "GET") {
-        const response = await handler();
-        return new Response(JSON.stringify(response), {
-          status: 200,
-        });
+      if (type && type.includes("form-data")) {
+        return await handleRequestFormData(req, handler);
       }
 
-      const input = await req.json();
-      const response = await handler(input);
+      if (req.method === "GET") {
+        return await handleRequestQuery(handler);
+      }
 
-      return new Response(JSON.stringify(response), {
-        status: 200,
-      });
+      return await handleRequestMutation(req, handler);
     } catch (error: any) {
       console.log(error, "CALLER ERROR");
       return new Response(JSON.stringify({ data: null, error: error.message }));
