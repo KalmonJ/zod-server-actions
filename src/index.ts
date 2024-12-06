@@ -1,4 +1,4 @@
-export { isResponseError } from "./guards";
+export { isResponseError } from "./types/guards";
 export {
   ActionHandler,
   type Config,

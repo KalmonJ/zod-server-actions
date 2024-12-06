@@ -1,5 +1,9 @@
 import _ from "lodash";
-import { isResponseError } from "../../guards";
+import {
+  isRequestFormData,
+  isRequestQuery,
+  isResponseError,
+} from "../../types/guards";
 import { Handler } from "../../types";
 
 export type JSONRoutes = { [key: string]: JSONRoutes } | Handler;
@@ -63,7 +67,6 @@ async function handleRequestQuery(handler: Function) {
 async function handleRequestMutation(req: Request, handler: Handler) {
   const input = await req.json();
   const response = await handler(input);
-
   return new Response(JSON.stringify(response), {
     status: 200,
   });
@@ -95,11 +98,11 @@ export function createHandlerCaller<T extends JSONRoutes>({
 
       if (!handler) throw new Error("Not found");
 
-      if (type && type.includes("form-data")) {
+      if (isRequestFormData(type)) {
         return await handleRequestFormData(req, handler);
       }
 
-      if (req.method === "GET") {
+      if (isRequestQuery(req.method)) {
         return await handleRequestQuery(handler);
       }
 
