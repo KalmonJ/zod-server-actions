@@ -1,155 +1,59 @@
-import { ZodType, type ZodTypeAny, z } from "zod";
-import type { ActionResponse, HandlerFn } from "../types";
-import { makeRetries } from "../utils/retry";
-import { Config, Retries } from "./handler-factory";
+import { Config } from "./config";
+import { ZodValidator } from "./validators";
+import { z, ZodTypeAny } from "zod";
+import { HandlerFn, QueryFn } from "../types";
+import { Handler, HandlerReturn } from "./handler";
+import { Query, QueryReturn } from "./query";
+import { RetriesConfig } from "./handler-factory";
 
 export class ActionHandler<
-  C extends Config,
-  I extends ZodType = any,
-  O extends ZodType = any,
+  C extends object,
+  I extends ZodTypeAny = any,
+  O extends ZodTypeAny = any,
 > {
-  private config: Config<C>;
-  private inputSchema?: ZodType<I>;
-  private outputSchema?: ZodType<O>;
+  constructor(
+    private readonly validator: ZodValidator,
+    private readonly config?: Config<C>,
+  ) {}
 
-  constructor(config: Config<C>, input?: ZodType<I>, output?: ZodType<O>) {
-    this.config = config;
-    this.inputSchema = input;
-    this.outputSchema = output;
+  input<S extends ZodTypeAny>(schema: S): ActionHandler<C, S, O> {
+    this.validator.setInputSchema(schema);
+    return new ActionHandler<C, S, O>(this.validator, this.config);
   }
 
-  input<S extends ZodTypeAny>(schema: S) {
-    return new ActionHandler<C, z.infer<S>, O>(
-      this.config,
-      schema,
-      this.outputSchema,
-    );
+  output<S extends ZodTypeAny>(schema: S): ActionHandler<C, I, S> {
+    this.validator.setOutputSchema(schema);
+    return new ActionHandler<C, I, S>(this.validator, this.config);
   }
 
-  output<S extends ZodTypeAny>(schema: S) {
-    return new ActionHandler<C, I, z.infer<S>>(
-      this.config,
-      this.inputSchema,
-      schema,
-    );
-  }
-
-  retry(config: Retries) {
-    this.config.retries = config;
-    return new ActionHandler<C, I, O>(
-      this.config,
-      this.inputSchema,
-      this.outputSchema,
-    );
-  }
-
-  handler<R extends O>(
-    callback: HandlerFn<I, R, C["context"]>,
-  ): <V extends I>(values: V) => Promise<ActionResponse<R>>;
-  handler<R>(
-    callback: HandlerFn<I, R, C["context"]>,
-  ): <V extends I>(values: V) => Promise<ActionResponse<O>>;
-  handler<R>(callback: HandlerFn<I, R, C["context"]>) {
-    const input = this.inputSchema;
-    const outputSchema = this.outputSchema;
-    const parseOutput = this.parseOutput.bind(this);
-    const errorHandler = this.errorHandler.bind(this);
-    const getContext = this.getContext.bind(this);
-
-    const handlerResponse = async function <V extends I>(
-      values: V,
-    ): Promise<ActionResponse<any>> {
-      const ctx = await getContext();
-
-      try {
-        const res = input
-          ? await callback(input.parse(values), ctx)
-          : await callback(values, ctx);
-        return parseOutput(res, outputSchema);
-      } catch (error: any) {
-        return errorHandler(values, error, callback, ctx);
-      }
-    };
-
-    handlerResponse.prototype = { type: "mutation" };
-
-    return handlerResponse;
-  }
-
-  query<R extends O>(
-    callback: HandlerFn<I | undefined, R, C["context"]>,
-  ): () => Promise<ActionResponse<R>>;
-  query<R>(
-    callback: HandlerFn<I | undefined, R, C["context"]>,
-  ): () => Promise<ActionResponse<O>>;
-  query<R>(callback: HandlerFn<I | undefined, R, C["context"]>) {
-    const parseOutput = this.parseOutput.bind(this);
-    const getContext = this.getContext.bind(this);
-    const errorHandler = this.errorHandler.bind(this);
-
-    const queryResponse = async function (): Promise<ActionResponse<any>> {
-      const ctx = await getContext();
-
-      try {
-        const data = await callback(undefined, ctx);
-        return parseOutput(data);
-      } catch (error: any) {
-        return await errorHandler<R>(undefined, error, callback, ctx);
-      }
-    };
-
-    queryResponse.prototype = { type: "query" };
-
-    return queryResponse;
-  }
-
-  private async getContext() {
-    return (await this.config.context) as Awaited<C["context"]>;
-  }
-
-  private async errorHandler<R>(
-    values: I | undefined,
-    error: any,
-    cb: HandlerFn<I, R, C["context"]>,
-    ctx: Awaited<C["context"]>,
-  ) {
-    if (!this.config.retries) {
-      return {
-        data: null,
-        error: error.message,
-      };
+  retry(config: RetriesConfig) {
+    if (this.config) {
+      this.config.setConfig({ ...this.config, retries: config });
     }
+    return new ActionHandler(this.validator, this.config);
+  }
 
-    const data = await makeRetries({
-      ...this.config.retries,
-      input: values as I,
-      context: ctx,
+  handler<R extends O>(cb: HandlerFn<I, C, R>): HandlerReturn<I, R>;
+  handler<R>(cb: HandlerFn<I, C, R>): HandlerReturn<I, z.infer<O>>;
+  handler<R>(cb: HandlerFn<I, C, R>) {
+    const config = this.config;
+    const validator = this.validator;
+    return Handler.create({
       cb,
+      config,
+      validator,
     });
-
-    if (!data) {
-      return {
-        data: null,
-        error: error.message,
-      };
-    }
-
-    return this.parseOutput(data);
   }
 
-  private parseOutput<T, O extends ZodType<O>>(response: T, output?: O) {
-    if (!output) {
-      return {
-        data: response,
-        error: null,
-      };
-    }
-
-    const outputData = output.parse(response);
-
-    return {
-      data: outputData,
-      error: null,
-    };
+  query<R extends O>(cb: QueryFn<R, C>): QueryReturn<R>;
+  query<R>(cb: QueryFn<R, C>): QueryReturn<z.infer<O>>;
+  query<R>(cb: QueryFn<R, C>) {
+    const config = this.config;
+    const validator = this.validator;
+    return Query.create({
+      cb,
+      config,
+      validator,
+    });
   }
 }
