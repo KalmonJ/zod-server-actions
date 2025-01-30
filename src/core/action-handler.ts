@@ -2,7 +2,7 @@ import { Config } from "./config";
 import { ZodValidator } from "./validators";
 import { z, ZodTypeAny } from "zod";
 import { HandlerFn, QueryFn } from "../types";
-import { Handler, HandlerReturn } from "./handler";
+import { createAction, HandlerReturn } from "./handler";
 import { Query, QueryReturn } from "./query";
 import { RetriesConfig } from "./handler-factory";
 
@@ -38,7 +38,7 @@ export class ActionHandler<
   handler<R>(cb: HandlerFn<I, C, R>) {
     const config = this.config;
     const validator = this.validator;
-    return Handler.create({
+    return createAction({
       cb,
       config,
       validator,
