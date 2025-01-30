@@ -1,6 +1,6 @@
 import { z, ZodTypeAny } from "zod";
 import { CreateHandlerProps, HandlerFn } from "../types";
-import { ActionResponse, ResponseError, ResponseSuccess } from "./response";
+import { ActionResponse, makeResponseError, makeResponseSuccess } from "./response";
 import { makeRetries } from "../utils";
 import { logger } from "./logger";
 
@@ -26,15 +26,15 @@ export class Handler {
 
         if (props.validator.outputSchema) {
           const outputData = props.validator.parseOutput(data);
-          return ResponseSuccess.create(outputData);
+          return makeResponseSuccess(outputData);
         }
 
         if (props.config && props.config.debug)
           logger.debug("Request handler success: ", data);
 
-        return ResponseSuccess.create(data);
+        return makeResponseSuccess(data);
       } catch (error) {
-        if (!props.config) return ResponseError.create(error);
+        if (!props.config) return makeResponseError(error);
 
         if (props.config.debug) logger.error("Request handler error: ", error);
 
@@ -45,19 +45,19 @@ export class Handler {
             input: inputData,
           });
 
-          if (!result) return ResponseError.create(error);
-          if (!props.validator.outputSchema) return ResponseSuccess.create(result);
+          if (!result) return makeResponseError(error);
+          if (!props.validator.outputSchema) return makeResponseSuccess(result);
 
           const outputData = props.validator.parseOutput(result);
-          return ResponseSuccess.create(outputData);
+          return makeResponseSuccess(outputData);
         }
 
         if (props.config.onError) {
           await props.config.onError(error);
-          return ResponseError.create(error);
+          return makeResponseError(error);
         }
 
-        return ResponseError.create(error);
+        return makeResponseError(error);
       }
     };
   }

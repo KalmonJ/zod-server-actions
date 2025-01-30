@@ -1,5 +1,5 @@
 import type { CreateHandlerProps, QueryFn } from "../types";
-import { ActionResponse, ResponseError, ResponseSuccess } from "./response";
+import { ActionResponse, makeResponseError, makeResponseSuccess } from "./response";
 
 type QueryProps<R, C extends object> = CreateHandlerProps<QueryFn<R, C>, C>;
 export type QueryReturn<R> = () => Promise<ActionResponse<R>>;
@@ -14,17 +14,17 @@ export class Query {
 
         if (props.validator.outputSchema) {
           const outputData = props.validator.parseOutput(data);
-          return ResponseSuccess.create(outputData);
+          return makeResponseSuccess(outputData);
         }
-        return ResponseSuccess.create(data);
+        return makeResponseSuccess(data);
       } catch (error) {
-        if (!props.config) return ResponseError.create(error);
+        if (!props.config) return makeResponseError(error);
 
         if (props.config.onError) {
           await props.config.onError(error);
-          return ResponseError.create(error);
+          return makeResponseError(error);
         }
-        return ResponseError.create(error);
+        return makeResponseError(error);
       }
     };
   }

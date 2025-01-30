@@ -16,11 +16,13 @@ export type RetryProps = {
 export type ResponseSuccess<T> = {
   data: T;
   error: null;
+  success: true;
 };
 
-export type ResponseError = {
+export type ResponseError<T = any> = {
   data: null;
-  error: string;
+  error: T;
+  success: false;
 };
 
 type ContextObject<C extends object> = Omit<Context<C>, "executeContextFn">;
