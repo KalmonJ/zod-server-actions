@@ -1,4 +1,5 @@
 import type { CreateHandlerProps, QueryFn } from "../types";
+import { makeRetries } from "../utils";
 import { ActionResponse, makeResponseError, makeResponseSuccess } from "./response";
 
 type QueryProps<R, C extends object> = CreateHandlerProps<QueryFn<R, C>, C>;
@@ -22,8 +23,8 @@ export class Query {
 
         if (props.config.onError) {
           await props.config.onError(error);
-          return makeResponseError(error);
         }
+
         return makeResponseError(error);
       }
     };

@@ -26,6 +26,7 @@ export class Handler {
 
         if (props.validator.outputSchema) {
           const outputData = props.validator.parseOutput(data);
+
           return makeResponseSuccess(outputData);
         }
 
@@ -35,6 +36,10 @@ export class Handler {
         return makeResponseSuccess(data);
       } catch (error) {
         if (!props.config) return makeResponseError(error);
+
+        if (props.config.onError) {
+          await props.config.onError(error);
+        }
 
         if (props.config.debug) logger.error("Request handler error: ", error);
 
@@ -49,12 +54,8 @@ export class Handler {
           if (!props.validator.outputSchema) return makeResponseSuccess(result);
 
           const outputData = props.validator.parseOutput(result);
-          return makeResponseSuccess(outputData);
-        }
 
-        if (props.config.onError) {
-          await props.config.onError(error);
-          return makeResponseError(error);
+          return makeResponseSuccess(outputData);
         }
 
         return makeResponseError(error);
